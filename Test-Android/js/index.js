@@ -16,35 +16,68 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+function onPushReceived(args) {
+	alert(JSON.stringify(args));
+}
+
 var app = {
-    // Application Constructor
-    initialize: function() {
-        this.bindEvents();
-    },
-    // Bind Event Listeners
-    //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
-    bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
-    },
-    // deviceready Event Handler
-    //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicity call 'app.receivedEvent(...);'
-    onDeviceReady: function() {
-        app.receivedEvent('deviceready');
-        navigator.splashscreen.hide();
-    },
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
+	// Application Constructor
+	initialize: function() {
+		this.bindEvents();
+	},
+	// Bind Event Listeners
+	//
+	// Bind any events that are required on startup. Common events are:
+	// 'load', 'deviceready', 'offline', and 'online'.
+	bindEvents: function() {
+		document.addEventListener('deviceready', this.onDeviceReady, false);
+	},
+	// deviceready Event Handler
+	//
+	// The scope of 'this' is the event. In order to call the 'receivedEvent'
+	// function, we must explicity call 'app.receivedEvent(...);'
+	onDeviceReady: function() {
+		navigator.splashscreen.hide();
+		
+		var el = new Everlive({
+								  apiKey: "YOUR_API_KEY",
+								  "scheme": "https"
+							  });
+		
+		var pushSettings = {
+			android: {
+				senderID: "YOUR_GOOGLE_PROJECT_NUMBER"
+			},
+			iOS: {
+				badge: true,
+				sound: true,
+				alert: true
+			},
+			wp8: {
+				channelName: 'EverlivePushChannel'
+			},
+			notificationCallbackAndroid: onPushReceived,
+			notificationCallbackIOS: onPushReceived,
+			notificationCallbackWP8: onPushReceived
+		};
+		el.push.register(pushSettings).then(function () {
+			alert("You are successfully registered for push notifications");
+		}, function(err) {
+			alert("Failed to register for push notifications" + JSON.stringify(err));
+		});
+		       
+		app.receivedEvent('deviceready');
+	},
+	// Update DOM on a Received Event
+	receivedEvent: function(id) {
+		var parentElement = document.getElementById(id);
+		var listeningElement = parentElement.querySelector('.listening');
+		var receivedElement = parentElement.querySelector('.received');
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
+		listeningElement.setAttribute('style', 'display:none;');
+		receivedElement.setAttribute('style', 'display:block;');
 
-        console.log('Received Event: ' + id);
-    }
+		console.log('Received Event: ' + id);
+	}
 };
